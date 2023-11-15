@@ -62,17 +62,17 @@ Without any additional argument, SuperID utilizes the "fast" method and provides
 If you want to upscale x2 and use the "normal" upscaling mode (based on diffusion), use the following general command:
 
 ```bash
-$ python3 main.py --upscaler_type '1' --upscaling_mode 'normal' --scale_factor '2' --output_format 'PNG' --prompt 'a photo of a woman' --prompt_strength '0.1' --controlnet_scale '0.5' --num_inference_steps 20 
+$ python3 main.py --upscaler_type '1' --upscaling_mode 'normal' --scale_factor '2' --output_format 'PNG' --prompt '' --prompt_strength '0.1' --controlnet_scale '0.5' --num_inference_steps 20 
 ```
 
-- <ins>upscaler_type</ins>: Select which upscaler to use: 0 (None), 1 (People), 2 (Scene), 3 (Mix)
-- <ins>upscaling_mode</ins>: Select the upscaling mode: fast (takes few seconds, lower quality) and normal (takes up to minutes, higher quality)
-- <ins>scale_factor</ins>: Select the upscaling factor: upscale time 2 or times 4
-- <ins>output_format</ins>: Save the upscaled image in PNG or JPEG
-- <ins>prompt</ins>: Describe your image
-- <ins>prompt_strength</ins>: The lower the more similar to the input image, the higher, the more diverse (range 0-1)
-- <ins>controlnet_scale</ins>: The higher, the more the upscaling will follow the lines of the input image (range 0-1)
-- <ins>num_inference_steps</ins>: The higher, the more denoising steps
+- **upscaler_type**: Select which upscaler to use: 0 (None), 1 (People), 2 (Scene), 3 (Mix)
+- **upscaling_mode**: Select the upscaling mode: fast (takes few seconds, lower quality) and normal (takes up to minutes, higher quality)
+- **scale_factor**: Select the upscaling factor: upscale time 2 or times 4
+- **output_format**: Save the upscaled image in PNG or JPEG
+- **prompt**: Describe your image
+- **prompt_strength**: The lower the more similar to the input image, the higher, the more diverse (range 0-1)
+- **controlnet_scale**: The higher, the more the upscaling will follow the lines of the input image (range 0-1)
+- **num_inference_steps**: The higher, the more denoising steps
 
 ## Contact
 office@piktid.com

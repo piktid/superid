@@ -6,7 +6,6 @@ import base64
 from PIL import Image, ImageFile, ImageFilter, ImageCms
 import copy
 import time
-from time import sleep
 from requests_toolbelt import MultipartEncoder
 
 
