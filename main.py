@@ -4,6 +4,7 @@ import json
 from io import BytesIO
 from PIL import Image, ImageFile, ImageFilter
 import argparse
+from time import sleep
 
 from superid_api import up_param, start_call, upload_superid_call, upscaling_call, get_notification_call, get_superid_info, get_superid_link
 
