@@ -59,8 +59,8 @@ if __name__ == '__main__':
         break
       except:
         # notification is not there yet, wait 10 seconds
-        print(f'Server is either booting up or processing your image, wait some seconds')
-      sleep(10)
+        print(f'Server is either booting up or processing your image, waiting {int(eta)} seconds')
+      sleep(int(eta))
 
     # save output_img as you prefer..
     # output_img = Image.open(requests.get(link,stream=True).raw)
