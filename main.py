@@ -5,6 +5,7 @@ from io import BytesIO
 from PIL import Image, ImageFile, ImageFilter
 import argparse
 from time import sleep
+import sys
 
 from superid_api import up_param, start_call, upload_superid_call, upscaling_call, get_notification_call, get_superid_info, get_superid_link
 
@@ -45,6 +46,11 @@ if __name__ == '__main__':
     # get an estimate of the amount of credits and time needed
     eta, credits, width, height = get_superid_info(id_project, id_image, upscaling_parameters, TOKEN)
     print(f'Image size: {width}, {height}. Estimated time of arrival of upscaled image: {eta}, and estimated credits: {credits}')
+    
+    # check size condition before proceeding
+    if max(width,height)<64:
+      print('Minimum size condition is not met, exiting..')
+      sys.exit(1)
 
     # upscale
     output = upscaling_call(id_project, id_image, upscaling_parameters, TOKEN)

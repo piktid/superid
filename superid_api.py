@@ -73,7 +73,6 @@ def im_2_b64(image):
     img_str = base64.b64encode(buff.getvalue()).decode('utf-8')
     return img_str
 
-
 ## -----------PROCESSING FUNCTIONS------------
 def start_call(email, password):
     # Get token
