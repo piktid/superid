@@ -48,7 +48,7 @@ if __name__ == '__main__':
     print(f'Image size: {width}, {height}. Estimated time of arrival of upscaled image: {eta}, and estimated credits: {credits}')
     
     # check size condition before proceeding
-    if max(width,height)<64:
+    if min(width,height)<64:
       print('Minimum size condition is not met, exiting..')
       sys.exit(1)
 
