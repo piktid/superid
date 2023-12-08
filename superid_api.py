@@ -23,6 +23,7 @@ class up_param():
         self.controlnet_scale = args.controlnet_scale
         self.prompt_strength = args.prompt_strength
         self.num_inference_steps = args.num_inference_steps
+        self.flag_email = args.flag_email
 
 ## -----------READ/WRITE FUNCTIONS------------
 def open_image_from_url(url):
@@ -112,15 +113,16 @@ def upscaling_call(id_project, id_image, upscaling_parameters, TOKEN):
     scale_factor = upscaling_parameters.scale_factor
     upscaler_type = upscaling_parameters.upscaler_type
     upscaling_mode = upscaling_parameters.upscaling_mode
-    output_format = upscaling_parameters.output_format
     prompt = upscaling_parameters.prompt
     controlnet_scale = upscaling_parameters.controlnet_scale
     prompt_strength = upscaling_parameters.prompt_strength
     num_inference_steps = upscaling_parameters.num_inference_steps
+    flag_email = upscaling_parameters.flag_email
+    output_format = upscaling_parameters.output_format
 
     response = requests.post(URL_API+'/superid', 
         headers={'Authorization': 'Bearer '+TOKEN},
-        json={'id_project':id_project, 'id_image':id_image, 'prompt': prompt, 'scale_factor':scale_factor, 'upscaler_type':upscaler_type, 'upscaling_mode':upscaling_mode, 'prompt_strength':prompt_strength, 'controlnet_conditioning_scale': controlnet_scale, 'num_inference_steps':num_inference_steps, 'output_format':output_format},
+        json={'id_project':id_project, 'id_image':id_image, 'prompt': prompt, 'scale_factor':scale_factor, 'upscaler_type':upscaler_type, 'upscaling_mode':upscaling_mode, 'prompt_strength':prompt_strength, 'controlnet_conditioning_scale': controlnet_scale, 'num_inference_steps':num_inference_steps, 'flag_email':flag_email, 'output_format':output_format},
         )
 
     print(response.content)

@@ -14,14 +14,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--upscaler_type', help='Select which upscaler to use: 0 (None), 1 (People), 2 (Scene), 3 (Mix)', default='1')
-    parser.add_argument('--upscaling_mode', help='Select the upscaling mode: fast (takes few seconds, lower quality) and normal (takes up to minutes, higher quality)', default='fast')
+    parser.add_argument('--upscaling_mode', help='Select the upscaling mode: fast (takes few seconds, lower quality), normal (takes up to minutes, higher quality on faces), super (takes up to minutes/hours, higher quality overall)', default='fast')
     parser.add_argument('--scale_factor', help='Select the upscaling factor: upscale time 2 or times 4', default='2')
+    parser.add_argument('--flag_email', help='Get the upscaled image via email', default=False)
     parser.add_argument('--output_format', help='Save the upscaled image in PNG or JPEG', default='PNG')
     # Parameters only for the normal mode
     parser.add_argument('--prompt', help='Describe your image', default='')
     parser.add_argument('--prompt_strength', help='The lower the more similar to the input image, the higher, the more diverse (range 0-1)', default='0.1')
     parser.add_argument('--controlnet_scale', help='The higher, the more the upscaling will follow the lines of the input image (range 0-1)', default='0.5')
     parser.add_argument('--num_inference_steps', help='The higher, the more denoising steps', default=20)
+
 
     args = parser.parse_args()
 
@@ -32,6 +34,7 @@ if __name__ == '__main__':
     ## START
     # insert the URL of the image to anonymize
     url = 'https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png' # photo of Lenna
+    #url = 'https://www.adorama.com/alc/wp-content/uploads/2018/11/landscape-photography-tips-yosemite-valley-feature.jpg'
     input_img = Image.open(BytesIO(requests.get(url,stream=False).content))
 
     # start the call
@@ -64,7 +67,7 @@ if __name__ == '__main__':
         print(f'Image available for download at: {link}')
         break
       except:
-        # notification is not there yet, wait 10 seconds
+        # notification is not there yet, wait eta seconds
         print(f'Server is either booting up or processing your image, waiting {int(eta)} seconds')
       sleep(int(eta))
 
