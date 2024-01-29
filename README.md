@@ -62,7 +62,7 @@ Without any additional argument, SuperID utilizes the "fast" method and provides
 If you want to upscale x2 and use the "normal" upscaling mode (based on diffusion), use the following general command:
 
 ```bash
-$ python3 main.py --upscaler_type '1' --upscaling_mode 'normal' --scale_factor '2' --output_format 'PNG' --flag_email True --prompt '' --prompt_strength '0.1' --controlnet_scale '0.5' --num_inference_steps 20
+$ python3 main.py --upscaler_type '1' --upscaling_mode 'normal' --scale_factor '2' --output_format 'PNG' --flag_email True --prompt '' --prompt_strength '0.1' --controlnet_scale '0.5' --num_inference_steps 20 --seed 0
 ```
 
 - **upscaler_type**: Select which upscaler to use: 0 (None), 1 (People), 2 (Scene), 3 (Mix)
@@ -72,8 +72,10 @@ $ python3 main.py --upscaler_type '1' --upscaling_mode 'normal' --scale_factor '
 - **flag_email**: Get the output link via email once ready
 - **prompt**: Describe your image
 - **prompt_strength**: The lower the more similar to the input image, the higher, the more diverse (range 0-1)
+- **guidance_scale**: How much to follow the description
 - **controlnet_scale**: The higher, the more the upscaling will follow the lines of the input image (range 0-1)
 - **num_inference_steps**: The higher, the more denoising steps
+- **seed**: Choose a seed to replicate the results
 
 ## Contact
 office@piktid.com
