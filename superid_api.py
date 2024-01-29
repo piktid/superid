@@ -1,29 +1,13 @@
 import os
-import requests
-import json
-from io import BytesIO
-import base64
-from PIL import Image, ImageFile, ImageFilter, ImageCms
 import copy
 import time
+import json
+import base64
+import requests
+from io import BytesIO
 from requests_toolbelt import MultipartEncoder
+from PIL import Image, ImageFile, ImageFilter, ImageCms
 
-
-URL_API = 'https://api.piktid.com/api'
-
-##----UPSCALING CLASS----
-# Do not modify the parameters unless you are an expert
-class up_param():
-    def __init__(self, args):
-        self.upscaler_type = args.upscaler_type
-        self.upscaling_mode = args.upscaling_mode
-        self.scale_factor = args.scale_factor
-        self.output_format = args.output_format
-        self.prompt = args.prompt
-        self.controlnet_scale = args.controlnet_scale
-        self.prompt_strength = args.prompt_strength
-        self.num_inference_steps = args.num_inference_steps
-        self.flag_email = args.flag_email
 
 ## -----------READ/WRITE FUNCTIONS------------
 def open_image_from_url(url):
@@ -34,10 +18,11 @@ def open_image_from_url(url):
     image = Image.open(BytesIO(response.content))
     return image
 
-def open_image_from_url_bytes(url, only_face=False):
-    response = requests.get(url, stream=True)
-    if not response.ok:
-        print(response)
+def open_image_from_path(path):
+    f = open(path, 'rb')
+    buffer = BytesIO(f.read())
+    image = Image.open(buffer)
+    return image
 
     return BytesIO(response.content)
 
@@ -74,17 +59,37 @@ def im_2_b64(image):
     img_str = base64.b64encode(buff.getvalue()).decode('utf-8')
     return img_str
 
+
 ## -----------PROCESSING FUNCTIONS------------
 def start_call(email, password):
     # Get token
+
+    URL_API = 'https://api.piktid.com/api'
+    print(f'Logging to: {URL_API}')
+
     response = requests.post(URL_API+'/tokens', data={}, auth=(email, password))
     response_json = json.loads(response.text)
-    TOKEN = response_json['access_token']
+    ACCESS_TOKEN = response_json['access_token']
+    REFRESH_TOKEN = response_json['refresh_token']
 
-    return TOKEN
+    return {'access_token':ACCESS_TOKEN, 'refresh_token':REFRESH_TOKEN, 'url_api':URL_API}
 
-def upload_superid_call(src_img, TOKEN):
+def refresh_call(TOKEN_DICTIONARY):
+    # Get token using only access and refresh tokens, no mail and psw
+    URL_API = TOKEN_DICTIONARY.get('url_api')
+    response = requests.put(URL_API+'/tokens', json=TOKEN_DICTIONARY)
+    response_json = json.loads(response.text)
+    ACCESS_TOKEN = response_json['access_token']
+    REFRESH_TOKEN = response_json['refresh_token']
+
+    return {'access_token':ACCESS_TOKEN, 'refresh_token':REFRESH_TOKEN, 'url_api':URL_API}
+
+# UPLOAD
+def upload_superid_call(src_img, TOKEN_DICTIONARY):
     # Upload the image into PiktID's servers and get the id of the project and of the image
+    TOKEN = TOKEN_DICTIONARY.get('access_token','')
+    URL_API = TOKEN_DICTIONARY.get('url_api')
+
     src_img_B = im_2_buffer(src_img)
 
     options = '0'
@@ -108,21 +113,49 @@ def upload_superid_call(src_img, TOKEN):
 
     return id_project, id_image
 
-def upscaling_call(id_project, id_image, upscaling_parameters, TOKEN):
+def update_data_upscaling_call(data, PARAM_DICTIONARY):
+    # update the json data first
 
-    scale_factor = upscaling_parameters.scale_factor
-    upscaler_type = upscaling_parameters.upscaler_type
-    upscaling_mode = upscaling_parameters.upscaling_mode
-    prompt = upscaling_parameters.prompt
-    controlnet_scale = upscaling_parameters.controlnet_scale
-    prompt_strength = upscaling_parameters.prompt_strength
-    num_inference_steps = upscaling_parameters.num_inference_steps
-    flag_email = upscaling_parameters.flag_email
-    output_format = upscaling_parameters.output_format
+    GUIDANCE_SCALE = PARAM_DICTIONARY.get('GUIDANCE_SCALE')
+    PROMPT_STRENGTH = PARAM_DICTIONARY.get('PROMPT_STRENGTH')
+    CONTROLNET_SCALE = PARAM_DICTIONARY.get('CONTROLNET_SCALE')
+
+    if GUIDANCE_SCALE is not None:
+        data.update({'guidance_scale':GUIDANCE_SCALE})
+        
+    if PROMPT_STRENGTH is not None:
+        data.update({'prompt_strength':PROMPT_STRENGTH})
+
+    if CONTROLNET_SCALE is not None:
+        data.update({'controlnet_conditioning_scale':CONTROLNET_SCALE})
+
+    return data
+
+def upscaling_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
+
+    id_project = PARAM_DICTIONARY.get('PROJECT_ID') 
+    id_image = PARAM_DICTIONARY.get('IMAGE_ID') 
+    seed = PARAM_DICTIONARY.get('SEED')
+    prompt = PARAM_DICTIONARY.get('PROMPT')
+    scale_factor = PARAM_DICTIONARY.get('SCALE_FACTOR')
+    upscaler_type = PARAM_DICTIONARY.get('UPSCALER_TYPE')
+    upscaling_mode = PARAM_DICTIONARY.get('UPSCALING_MODE')
+    num_inference_steps = PARAM_DICTIONARY.get('STEPS')
+    flag_email = PARAM_DICTIONARY.get('FLAG_EMAIL')
+    output_format = PARAM_DICTIONARY.get('OUTPUT_FORMAT')
+
+    data = {'id_project':id_project, 'id_image':id_image, 'prompt': prompt, 'scale_factor':scale_factor, 'upscaler_type':upscaler_type, 
+            'upscaling_mode':upscaling_mode, 'num_inference_steps':num_inference_steps, 'flag_email':flag_email, 'output_format':output_format}
+
+    data = update_data_upscaling_call(data, PARAM_DICTIONARY)
+    print(f'data to send to upscale: {data}')
+
+    TOKEN = TOKEN_DICTIONARY.get('access_token','')
+    URL_API = TOKEN_DICTIONARY.get('url_api')
 
     response = requests.post(URL_API+'/superid', 
         headers={'Authorization': 'Bearer '+TOKEN},
-        json={'id_project':id_project, 'id_image':id_image, 'prompt': prompt, 'scale_factor':scale_factor, 'upscaler_type':upscaler_type, 'upscaling_mode':upscaling_mode, 'prompt_strength':prompt_strength, 'controlnet_conditioning_scale': controlnet_scale, 'num_inference_steps':num_inference_steps, 'flag_email':flag_email, 'output_format':output_format},
+        json=data,
         )
 
     print(response.content)
@@ -140,16 +173,26 @@ def get_notification_call(TOKEN):
     print(f'response: {response.text}')
     return
 
-def get_superid_info(id_project, id_image, upscaling_parameters, TOKEN):
-    # get ETA and credits needed for generation
-    scale_factor = upscaling_parameters.scale_factor
-    upscaling_mode = upscaling_parameters.upscaling_mode
-    strength = upscaling_parameters.prompt_strength
-    num_inference_steps = upscaling_parameters.num_inference_steps
+def get_superid_info(PARAM_DICTIONARY, TOKEN_DICTIONARY):
+    # get ETA and credits needed for upscaling
+    id_project = PARAM_DICTIONARY.get('PROJECT_ID') 
+    id_image = PARAM_DICTIONARY.get('IMAGE_ID') 
+    prompt = PARAM_DICTIONARY.get('PROMPT')
+    scale_factor = PARAM_DICTIONARY.get('SCALE_FACTOR')
+    upscaling_mode = PARAM_DICTIONARY.get('UPSCALING_MODE')
+    num_inference_steps = PARAM_DICTIONARY.get('STEPS')
+    strength = PARAM_DICTIONARY.get('PROMPT_STRENGTH')
+    strength = '0.2' if strength is None else strength
+
+    data = {'id_project':id_project, 'id_image':id_image, 'scale_factor':scale_factor, 'upscaling_mode':upscaling_mode, 
+            'strength':strength, 'num_inference_steps': num_inference_steps}
+
+    TOKEN = TOKEN_DICTIONARY.get('access_token','')
+    URL_API = TOKEN_DICTIONARY.get('url_api')
 
     response = requests.get(URL_API+'/superid_info', 
         headers={'Authorization': 'Bearer '+TOKEN},
-        json={'id_project':id_project, 'id_image':id_image, 'scale_factor':scale_factor, 'upscaling_mode':upscaling_mode, 'strength':strength, 'num_inference_steps': num_inference_steps},
+        json=data,
     )
     
     #print(response.content) 
@@ -162,14 +205,21 @@ def get_superid_info(id_project, id_image, upscaling_parameters, TOKEN):
 
     return eta, credits, width, height
 
-def get_superid_link(id_project, id_image, TOKEN):
+def get_superid_link(PARAM_DICTIONARY, TOKEN_DICTIONARY):
     # get info on the upscaled image
+
+    id_project = PARAM_DICTIONARY.get('PROJECT_ID') 
+    id_image = PARAM_DICTIONARY.get('IMAGE_ID') 
+    data = {'id_project':id_project, 'id_image':id_image}
+
+    TOKEN = TOKEN_DICTIONARY.get('access_token','')
+    URL_API = TOKEN_DICTIONARY.get('url_api')
+
     response = requests.get(URL_API+'/superid', 
         headers={'Authorization': 'Bearer '+TOKEN},
-        json={'id_project':id_project, 'id_image':id_image},
+        json=data,
     )
     
-    #print(response.content) 
     response_json = json.loads(response.text)
     #print(f'response: {response_json}')
     link = response_json[-1].get('l')
