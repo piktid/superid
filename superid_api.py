@@ -106,7 +106,7 @@ def upload_superid_call(src_img, TOKEN_DICTIONARY):
                             )
 
     response_json = json.loads(response.text)
-    print(response_json)
+    #print(response_json)
     
     id_project = response_json.get('id_project')
     id_image = response_json.get('id_image')
@@ -116,9 +116,12 @@ def upload_superid_call(src_img, TOKEN_DICTIONARY):
 def update_data_upscaling_call(data, PARAM_DICTIONARY):
     # update the json data first
 
+    PROMPT = PARAM_DICTIONARY.get('PROMPT')
+
     GUIDANCE_SCALE = PARAM_DICTIONARY.get('GUIDANCE_SCALE')
     PROMPT_STRENGTH = PARAM_DICTIONARY.get('PROMPT_STRENGTH')
     CONTROLNET_SCALE = PARAM_DICTIONARY.get('CONTROLNET_SCALE')
+    STEPS = PARAM_DICTIONARY.get('STEPS')
 
     if GUIDANCE_SCALE is not None:
         data.update({'guidance_scale':GUIDANCE_SCALE})
@@ -129,6 +132,9 @@ def update_data_upscaling_call(data, PARAM_DICTIONARY):
     if CONTROLNET_SCALE is not None:
         data.update({'controlnet_conditioning_scale':CONTROLNET_SCALE})
 
+    if STEPS is not None:
+        data.update({'num_inference_steps':STEPS})
+
     return data
 
 def upscaling_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
@@ -136,16 +142,21 @@ def upscaling_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
     id_project = PARAM_DICTIONARY.get('PROJECT_ID') 
     id_image = PARAM_DICTIONARY.get('IMAGE_ID') 
     seed = PARAM_DICTIONARY.get('SEED')
-    prompt = PARAM_DICTIONARY.get('PROMPT')
     scale_factor = PARAM_DICTIONARY.get('SCALE_FACTOR')
     upscaler_type = PARAM_DICTIONARY.get('UPSCALER_TYPE')
     upscaling_mode = PARAM_DICTIONARY.get('UPSCALING_MODE')
-    num_inference_steps = PARAM_DICTIONARY.get('STEPS')
     flag_email = PARAM_DICTIONARY.get('FLAG_EMAIL')
     output_format = PARAM_DICTIONARY.get('OUTPUT_FORMAT')
 
-    data = {'id_project':id_project, 'id_image':id_image, 'prompt': prompt, 'scale_factor':scale_factor, 'upscaler_type':upscaler_type, 
-            'upscaling_mode':upscaling_mode, 'num_inference_steps':num_inference_steps, 'flag_email':flag_email, 'output_format':output_format}
+    data = {'id_project':id_project, 
+            'id_image':id_image, 
+            'scale_factor':scale_factor, 
+            'upscaler_type':upscaler_type, 
+            'upscaling_mode':upscaling_mode, 
+            'flag_email':flag_email, 
+            'output_format':output_format, 
+            'seed':seed
+            }
 
     data = update_data_upscaling_call(data, PARAM_DICTIONARY)
     print(f'data to send to upscale: {data}')
@@ -158,7 +169,7 @@ def upscaling_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
         json=data,
         )
 
-    print(response.content)
+    #print(response.content)
     response_json = json.loads(response.text)
 
     return response_json
@@ -181,8 +192,10 @@ def get_superid_info(PARAM_DICTIONARY, TOKEN_DICTIONARY):
     scale_factor = PARAM_DICTIONARY.get('SCALE_FACTOR')
     upscaling_mode = PARAM_DICTIONARY.get('UPSCALING_MODE')
     num_inference_steps = PARAM_DICTIONARY.get('STEPS')
+    num_inference_steps = 20 if num_inference_steps is None else num_inference_steps
+
     strength = PARAM_DICTIONARY.get('PROMPT_STRENGTH')
-    strength = '0.2' if strength is None else strength
+    strength = '0.3' if strength is None else strength
 
     data = {'id_project':id_project, 'id_image':id_image, 'scale_factor':scale_factor, 'upscaling_mode':upscaling_mode, 
             'strength':strength, 'num_inference_steps': num_inference_steps}
@@ -197,7 +210,7 @@ def get_superid_info(PARAM_DICTIONARY, TOKEN_DICTIONARY):
     
     #print(response.content) 
     response_json = json.loads(response.text)
-    print(f'response: {response_json}')
+    #print(f'response: {response_json}')
     eta = response_json.get('eta')
     credits = response_json.get('required_credits')
     width = response_json.get('width')
@@ -222,5 +235,6 @@ def get_superid_link(PARAM_DICTIONARY, TOKEN_DICTIONARY):
     
     response_json = json.loads(response.text)
     #print(f'response: {response_json}')
-    link = response_json[-1].get('l')
+    list_links = response_json.get('links_list')
+    link = list_links[-1].get('l')
     return link
