@@ -34,6 +34,7 @@ def process_single_image(input_image, PARAM_DICTIONARY, TOKEN_DICTIONARY):
     while i<10: # max 10 iterations -> then timeout
         i = i+1
         try:
+            # check via notifications
             link = get_superid_link(PARAM_DICTIONARY, TOKEN_DICTIONARY)
             print(f'Image available for download at: {link}')
             break
