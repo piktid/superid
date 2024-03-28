@@ -76,20 +76,6 @@ if __name__ == '__main__':
     TOKEN_DICTIONARY = start_call(EMAIL, PASSWORD)
 
 
-    UPSCALER_TYPE = args.upscaler_type
-    UPSCALING_MODE = args.upscaling_mode
-    SCALE_FACTOR = args.scale_factor
-    FLAG_EMAIL = args.flag_email
-    OUTPUT_FORMAT = args.output_format
-
-    PROMPT = args.prompt
-    GUIDANCE_SCALE = args.guidance_scale
-    PROMPT_STRENGTH = args.prompt_strength
-    CONTROLNET_SCALE = args.controlnet_scale
-    STEPS = args.num_inference_steps
-    SEED = args.seed
-
-
     PARAM_DICTIONARY = {
             'INPUT_PATH':INPUT_PATH,
             'UPSCALER_TYPE': UPSCALER_TYPE,

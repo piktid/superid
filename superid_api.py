@@ -59,6 +59,14 @@ def im_2_b64(image):
     img_str = base64.b64encode(buff.getvalue()).decode('utf-8')
     return img_str
 
+## ---QUICK UTILS---
+
+def extract_link(data_list, id_image, id_project):
+    for item in data_list:
+        if item['data']['id_image'] == id_image and item['data']['id_project'] == id_project:
+            return item['data']['link']['l']
+    return None
+
 
 ## -----------PROCESSING FUNCTIONS------------
 def start_call(email, password):
@@ -175,14 +183,18 @@ def upscaling_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
     return response_json
 
 # NOTIFICATION FUNCTIONS
-def get_notification_call(TOKEN):
+def get_notification_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
 
-    response = requests.post(URL_API+'/notification_by_name', 
+    TOKEN = TOKEN_DICTIONARY.get('access_token','')
+    URL_API = TOKEN_DICTIONARY.get('url_api')
+
+    response = requests.post(URL_API+'/notification_by_name_json', 
         headers={'Authorization': 'Bearer '+TOKEN},
         json={'name_list':'superid'}
         )
-    print(f'response: {response.text}')
-    return
+    response_json = json.loads(response.text)
+    return response_json.get('notifications_list')
+
 
 def get_superid_info(PARAM_DICTIONARY, TOKEN_DICTIONARY):
     # get ETA and credits needed for upscaling
@@ -225,16 +237,10 @@ def get_superid_link(PARAM_DICTIONARY, TOKEN_DICTIONARY):
     id_image = PARAM_DICTIONARY.get('IMAGE_ID') 
     data = {'id_project':id_project, 'id_image':id_image}
 
-    TOKEN = TOKEN_DICTIONARY.get('access_token','')
-    URL_API = TOKEN_DICTIONARY.get('url_api')
+    # extract notifications
+    notifications_list = get_notification_call(PARAM_DICTIONARY, TOKEN_DICTIONARY)
+    print(f'Notifications list: {notifications_list}')
 
-    response = requests.get(URL_API+'/superid', 
-        headers={'Authorization': 'Bearer '+TOKEN},
-        json=data,
-    )
+    link = extract_link(notifications_list, id_image, id_project)
     
-    response_json = json.loads(response.text)
-    #print(f'response: {response_json}')
-    list_links = response_json.get('links_list')
-    link = list_links[-1].get('l')
     return link
