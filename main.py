@@ -1,11 +1,7 @@
 import os
 import sys
-import json
 import argparse
-from time import sleep
-from io import BytesIO
 from random import randint
-from PIL import Image, ImageFile, ImageFilter
 
 from superid_utils import process_single_image
 from superid_api import open_image_from_path, open_image_from_url, start_call
@@ -17,7 +13,7 @@ if __name__ == '__main__':
     parser.add_argument('--url', help='Image file url', type=str, default='https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png')
     parser.add_argument('--filepath', help='Input image file absolute path', type=str, default=None)
 
-    parser.add_argument('--upscaler_type', help='Select which upscaler to use: 0 (None), 1 (Soft Portrait), 2 (Hard Portrait), 3 (Mix)', default='3')
+    parser.add_argument('--upscaler_type', help='Select which upscaler to use: 0 (None), 1 (Soft Portrait), 2 (Hard Portrait), 3 (Mix), 4 (Best overall)', default='4')
     parser.add_argument('--upscaling_mode', help='Select the upscaling mode: fast (takes few seconds, lower quality, currently not available), super (takes up to minutes, higher quality overall)', default='super')
     parser.add_argument('--scale_factor', help='Select the upscaling factor: upscale time 2 or times 4', default='2')
     parser.add_argument('--flag_email', help='Get the upscaled image via email', default=False)
@@ -30,7 +26,6 @@ if __name__ == '__main__':
     parser.add_argument('--controlnet_scale', help='The higher, the more the upscaling will follow the lines of the input image (range 0-1)', type=str, default=None)
     parser.add_argument('--num_inference_steps', help='The higher, the more denoising steps', default=None)
     parser.add_argument('--seed', help='Upscaling seed', type=int, default=randint(0,100000))
-
 
     args = parser.parse_args()
 
@@ -71,20 +66,18 @@ if __name__ == '__main__':
             print('Wrong URL, check again')
             sys.exit()
 
-
     # log in
     TOKEN_DICTIONARY = start_call(EMAIL, PASSWORD)
 
-
     PARAM_DICTIONARY = {
-            'INPUT_PATH':INPUT_PATH,
+            'INPUT_PATH': INPUT_PATH,
             'UPSCALER_TYPE': UPSCALER_TYPE,
-            'UPSCALING_MODE':UPSCALING_MODE,
-            'SCALE_FACTOR':SCALE_FACTOR,
-            'FLAG_EMAIL':FLAG_EMAIL,
-            'OUTPUT_FORMAT':OUTPUT_FORMAT,
-            'SEED':SEED,
-            'PROMPT':PROMPT,
+            'UPSCALING_MODE': UPSCALING_MODE,
+            'SCALE_FACTOR': SCALE_FACTOR,
+            'FLAG_EMAIL': FLAG_EMAIL,
+            'OUTPUT_FORMAT': OUTPUT_FORMAT,
+            'SEED': SEED,
+            'PROMPT': PROMPT,
             'GUIDANCE_SCALE': GUIDANCE_SCALE,
             'PROMPT_STRENGTH': PROMPT_STRENGTH,
             'CONTROLNET_SCALE': CONTROLNET_SCALE,
@@ -92,4 +85,4 @@ if __name__ == '__main__':
         }
 
     response = process_single_image(input_image, PARAM_DICTIONARY, TOKEN_DICTIONARY) 
-    print(response)  
+    print(response)

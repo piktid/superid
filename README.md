@@ -5,7 +5,7 @@
 </p>
 
 
-# SuperID 2.0
+# SuperID 3.0
 [![Official Website](https://img.shields.io/badge/Official%20Website-piktid.com-blue?style=flat&logo=world&logoColor=white)](https://piktid.com)
 [![Discord Follow](https://dcbadge.vercel.app/api/server/FJU39e9Z4P?style=flat)](https://discord.com/invite/FJU39e9Z4P)
 
@@ -62,10 +62,10 @@ Without any additional argument, SuperID utilizes the "super" method and provide
 If you want to upscale x2, use the following general command:
 
 ```bash
-$ python3 main.py --upscaler_type '3' --scale_factor '2' --output_format 'PNG' --flag_email True --prompt '' --prompt_strength '0.3' --controlnet_scale '0.5' --num_inference_steps 20 --seed 0
+$ python3 main.py --upscaler_type '4' --scale_factor '2' --output_format 'PNG' --flag_email True --prompt '' --prompt_strength '0.35' --controlnet_scale '0.5' --num_inference_steps 20 --seed 0
 ```
 
-- **upscaler_type**: Select which upscaler to use: 0 (None), 1 (Soft Portrait), 2 (Hard Portrait), 3 (Mix)
+- **upscaler_type**: Select which upscaler to use: 0 (None), 1 (Soft Portrait), 2 (Hard Portrait), 3 (Mix), 4 (Best overall)
 - **upscaling_mode**: Select the upscaling mode: fast (takes few seconds, lower quality, not available at the moment), super (takes up to minutes, higher quality overall)
 - **scale_factor**: Select the upscaling factor: upscale time 2 or times 4
 - **output_format**: Save the upscaled image in PNG or JPEG
