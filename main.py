@@ -22,8 +22,8 @@ if __name__ == '__main__':
     # Parameters only for the normal and super mode
     parser.add_argument('--prompt', help='Describe your image', default=None)
     parser.add_argument('--guidance_scale', help='Guidance scale', type=str, default=None)
-    parser.add_argument('--prompt_strength', help='The lower the more similar to the input image, the higher, the more diverse (range 0-1)', type=str, default=None)
-    parser.add_argument('--controlnet_scale', help='The higher, the more the upscaling will follow the lines of the input image (range 0-1)', type=str, default=None)
+    parser.add_argument('--prompt_strength', help='Creativity, the lower the more similar to the input image, the higher, the more diverse (range 0-1)', type=str, default=None)
+    parser.add_argument('--controlnet_scale', help='Fidelity, the higher, the more the upscaling will follow the resemblance of the input image (range 0-1)', type=str, default=None)
     parser.add_argument('--num_inference_steps', help='The higher, the more denoising steps', default=None)
     parser.add_argument('--seed', help='Upscaling seed', type=int, default=randint(0,100000))
 

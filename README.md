@@ -5,12 +5,12 @@
 </p>
 
 
-# SuperID 3.0
+# SuperID 3.0.1
 [![Official Website](https://img.shields.io/badge/Official%20Website-piktid.com-blue?style=flat&logo=world&logoColor=white)](https://piktid.com)
 [![Discord Follow](https://dcbadge.vercel.app/api/server/FJU39e9Z4P?style=flat)](https://discord.com/invite/FJU39e9Z4P)
 
 SuperID is GenAI upscaler, particularly suitable for portrait photos. 
-It is based on both GANs and diffusion models, rendering it extremely powerful in adding missing details.
+It is based on GANs, transformers and diffusion models, rendering it extremely powerful in adding missing details.
 
 [![SuperID examples](http://i3.ytimg.com/vi/0UKFPpC50m0/hqdefault.jpg)](https://www.youtube.com/watch?v=0UKFPpC50m0)
 
