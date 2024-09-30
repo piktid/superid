@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--url', help='Image file url', type=str, default='https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png')
+    parser.add_argument('--url', help='Image file url', type=str, default='https://images.piktid.com/frontend/studio/superid/upscaler_sample/21z.png')
     parser.add_argument('--filepath', help='Input image file absolute path', type=str, default=None)
 
     parser.add_argument('--upscaler_type', help='Select which upscaler to use: 0 (None), 1 (Soft Portrait), 2 (Hard Portrait), 3 (Mix), 4 (Best overall)', default='4')
