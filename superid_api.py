@@ -73,7 +73,6 @@ def extract_link(data_list, id_image, id_project):
 # -----------PROCESSING FUNCTIONS------------
 def start_call(email, password):
     # Get token
-
     URL_API = 'https://api.piktid.com/api'
     print(f'Logging to: {URL_API}')
 
@@ -132,7 +131,6 @@ def update_data_upscaling_call(data, PARAM_DICTIONARY):
     GUIDANCE_SCALE = PARAM_DICTIONARY.get('GUIDANCE_SCALE')
     PROMPT_STRENGTH = PARAM_DICTIONARY.get('PROMPT_STRENGTH')
     CONTROLNET_SCALE = PARAM_DICTIONARY.get('CONTROLNET_SCALE')
-    STEPS = PARAM_DICTIONARY.get('STEPS')
 
     if GUIDANCE_SCALE is not None:
         data.update({'guidance_scale': GUIDANCE_SCALE})
@@ -143,20 +141,33 @@ def update_data_upscaling_call(data, PARAM_DICTIONARY):
     if CONTROLNET_SCALE is not None:
         data.update({'controlnet_conditioning_scale': CONTROLNET_SCALE})
 
-    if STEPS is not None:
-        data.update({'num_inference_steps': STEPS})
+    # extra options
+
+    FACE_FIXER = PARAM_DICTIONARY.get('FACE_FIXER')
+    DENOISE_INPUT = PARAM_DICTIONARY.get('DENOISE_INPUT')
+
+    OPTIONS_DICT = {}
+
+    if FACE_FIXER is not None:
+        OPTIONS_DICT = {**OPTIONS_DICT, 'face_enhancer': FACE_FIXER}
+
+    if DENOISE_INPUT is not None:
+        OPTIONS_DICT = {**OPTIONS_DICT, 'denoise_input': DENOISE_INPUT}
+
+    OPTIONS = json.dumps(OPTIONS_DICT)
+    extra_options = {'options': OPTIONS}
+    data.update(extra_options)
 
     return data
 
 
 def upscaling_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
-
     id_project = PARAM_DICTIONARY.get('PROJECT_ID') 
     id_image = PARAM_DICTIONARY.get('IMAGE_ID') 
     seed = PARAM_DICTIONARY.get('SEED')
     scale_factor = PARAM_DICTIONARY.get('SCALE_FACTOR')
-    upscaler_type = PARAM_DICTIONARY.get('UPSCALER_TYPE')
-    upscaling_mode = PARAM_DICTIONARY.get('UPSCALING_MODE')
+    upscaler_type = PARAM_DICTIONARY.get('UPSCALER_TYPE', '4')
+    upscaling_mode = PARAM_DICTIONARY.get('UPSCALING_MODE', 'super')
     flag_email = PARAM_DICTIONARY.get('FLAG_EMAIL')
     output_format = PARAM_DICTIONARY.get('OUTPUT_FORMAT')
 
@@ -181,6 +192,37 @@ def upscaling_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
                              json=data,
                              )
 
+    response_json = json.loads(response.text)
+
+    return response_json
+
+
+def upscaling_fast_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
+    id_project = PARAM_DICTIONARY.get('PROJECT_ID') 
+    id_image = PARAM_DICTIONARY.get('IMAGE_ID') 
+    seed = PARAM_DICTIONARY.get('SEED')
+    scale_factor = PARAM_DICTIONARY.get('SCALE_FACTOR')
+    flag_email = PARAM_DICTIONARY.get('FLAG_EMAIL')
+    output_format = PARAM_DICTIONARY.get('OUTPUT_FORMAT')
+
+    data = {'id_project': id_project, 
+            'id_image': id_image, 
+            'scale_factor': scale_factor, 
+            'flag_email': flag_email, 
+            'output_format': output_format, 
+            'seed': seed
+            }
+
+    print(f'data to send to fast upscale: {data}')
+
+    TOKEN = TOKEN_DICTIONARY.get('access_token', '')
+    URL_API = TOKEN_DICTIONARY.get('url_api')
+
+    response = requests.post(URL_API+'/superid_fast', 
+                             headers={'Authorization': 'Bearer '+TOKEN},
+                             json=data,
+                             )
+
     # print(response.content)
     response_json = json.loads(response.text)
 
@@ -189,7 +231,6 @@ def upscaling_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
 
 # NOTIFICATION FUNCTIONS
 def get_notification_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
-
     TOKEN = TOKEN_DICTIONARY.get('access_token', '')
     URL_API = TOKEN_DICTIONARY.get('url_api')
 
@@ -206,15 +247,12 @@ def get_superid_info(PARAM_DICTIONARY, TOKEN_DICTIONARY):
     id_project = PARAM_DICTIONARY.get('PROJECT_ID') 
     id_image = PARAM_DICTIONARY.get('IMAGE_ID') 
     scale_factor = PARAM_DICTIONARY.get('SCALE_FACTOR')
-    upscaling_mode = PARAM_DICTIONARY.get('UPSCALING_MODE')
-    num_inference_steps = PARAM_DICTIONARY.get('STEPS')
-    num_inference_steps = 20 if num_inference_steps is None else num_inference_steps
 
-    strength = PARAM_DICTIONARY.get('PROMPT_STRENGTH')
-    strength = '0.35' if strength is None else strength
+    upscaling_mode = PARAM_DICTIONARY.get('UPSCALING_MODE', 'super')
+    strength = PARAM_DICTIONARY.get('PROMPT_STRENGTH', '0.35')
 
     data = {'id_project': id_project, 'id_image': id_image, 'scale_factor': scale_factor, 'upscaling_mode': upscaling_mode, 
-            'strength': strength, 'num_inference_steps': num_inference_steps}
+            'strength': strength, 'num_inference_steps': 20}
 
     TOKEN = TOKEN_DICTIONARY.get('access_token', '')
     URL_API = TOKEN_DICTIONARY.get('url_api')
@@ -224,9 +262,7 @@ def get_superid_info(PARAM_DICTIONARY, TOKEN_DICTIONARY):
                             json=data,
                             )
     
-    # print(response.content) 
     response_json = json.loads(response.text)
-    # print(f'response: {response_json}')
     eta = response_json.get('eta')
     credits = response_json.get('required_credits')
     width = response_json.get('width')
@@ -237,14 +273,11 @@ def get_superid_info(PARAM_DICTIONARY, TOKEN_DICTIONARY):
 
 def get_superid_link(PARAM_DICTIONARY, TOKEN_DICTIONARY):
     # get info on the upscaled image
-
     id_project = PARAM_DICTIONARY.get('PROJECT_ID') 
     id_image = PARAM_DICTIONARY.get('IMAGE_ID') 
-    # data = {'id_project':id_project, 'id_image':id_image}
 
     # extract notifications
     notifications_list = get_notification_call(PARAM_DICTIONARY, TOKEN_DICTIONARY)
-    # print(f'Notifications list: {notifications_list}')
 
     link = extract_link(notifications_list, id_image, id_project)
     
