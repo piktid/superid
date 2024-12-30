@@ -21,7 +21,7 @@ SuperID utilizes generative models to intelligently upscale your photos. It can 
 - <ins>Close-up portrait photos</ins>: Since the generative models behind SuperID are trained on human faces, the AI performs better when a single face is provided as input.
 - <ins>Small thumbnails</ins>: When the photo to upscale is at very low resolution (e.g. 128x128), SuperID can add missing details. 
 - <ins>Photos with noise and JPEG artifacts</ins>: SuperID can effectively denoise and remove artifacts from your photos.
-- <ins>Images with transparent backgrounds</ins>: SuperID intelligently upscale PNG images (e.g. logos) with transparent backgrounds.
+- <ins>Images with transparent backgrounds</ins>: SuperID intelligently upscales PNG images (e.g. logos) with transparent backgrounds.
 
 ## Getting Started
 <a target="_blank" href="https://colab.research.google.com/drive/1DBjyDcwrZBzFPFCDjRnmNHBt2mEqxW6D?usp=sharing">
@@ -47,16 +47,9 @@ $ export SUPERID_EMAIL={Your email here}
 $ export SUPERID_PASSWORD={Your password here}
 ```
 
-> **Step 3** - Change in main.py the URL of the image to be upscaled
-```python
-...
-url = 'your-url'
-...
-```
-
-> **Step 4** - Run the main function
+> **Step 3** - Run the main function with the URL of the image to be upscaled
 ```bash
-$ python3 main.py
+$ python3 main.py --url 'your-url'
 ```
 
 Without any additional argument, SuperID upscales the image times 2 and provides the result asynchronously. 
