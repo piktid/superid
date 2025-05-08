@@ -4,7 +4,7 @@ import argparse
 from random import randint
 
 from superid_utils import process_single_image
-from superid_api import open_image_from_path, open_image_from_url, start_call
+from superid_api import start_call
 
 if __name__ == '__main__':
 
@@ -20,14 +20,12 @@ if __name__ == '__main__':
 
     # Parameters only for the normal and super mode
     parser.add_argument('--prompt', help='Describe your image', default='')
-    parser.add_argument('--guidance_scale', help='Guidance scale', type=str, default='3')
-    parser.add_argument('--prompt_strength', help='Creativity, the lower the more similar to the input image, the higher, the more diverse (range 0-1)', type=str, default='0.35')
-    parser.add_argument('--controlnet_scale', help='Fidelity, the higher, the more the upscaling will follow the resemblance of the input image (range 0-1)', type=str, default='0.5')
+    parser.add_argument('--fractality', help='Fractality, the higher the more adherent to the prompt (range 1-20)', type=int, default=3)
+    parser.add_argument('--creativity', help='Creativity, the lower the more similar to the input image, the higher, the more diverse (range 1-20)', type=int, default=7)
+    parser.add_argument('--fidelity', help='Fidelity, the higher, the more the upscaling will follow the resemblance of the input image (range 0-20)', type=int, default=5)
+    parser.add_argument('--denoise', help='Denoise filter amount (range 0-20)', type=int, default=1)    
     parser.add_argument('--seed', help='Upscaling seed', type=int, default=randint(0, 100000))
-
-    # Pre-post processing parameters
-    parser.add_argument('--face_fixer', help='Fix small faces', action='store_true')
-    parser.add_argument('--denoise_input', help='Denoise filter amount, range 0-1', type=str, default='0.0')
+    parser.add_argument('--face_enhancer', help='Enhance small faces', action='store_true')
 
     args = parser.parse_args()
 
@@ -42,30 +40,27 @@ if __name__ == '__main__':
     OUTPUT_FORMAT = args.output_format
 
     PROMPT = args.prompt
-    GUIDANCE_SCALE = args.guidance_scale
-    PROMPT_STRENGTH = args.prompt_strength
-    CONTROLNET_SCALE = args.controlnet_scale
+    FRACTALITY = args.fractality
+    CREATIVITY = args.creativity
+    FIDELITY = args.fidelity
     SEED = args.seed
-
-    FACE_FIXER = args.face_fixer
-    DENOISE_INPUT = args.denoise_input
+    FACE_ENHANCER = args.face_enhancer
+    DENOISE = args.denoise
 
     # Image parameters
-    URL = args.url 
+    INPUT_URL = args.url 
     INPUT_PATH = args.filepath
 
     if INPUT_PATH is not None:
         if os.path.exists(INPUT_PATH):
-            input_image = open_image_from_path(INPUT_PATH)
             print(f'Using as input image the file located at: {INPUT_PATH}')
         else:
             print('Wrong filepath, check again')
             sys.exit()
     else:
-        try:
-            input_image = open_image_from_url(URL)
-            print(f'Using as input image the file located at: {URL}')
-        except:
+        if INPUT_URL is not None:
+            print(f'Using as input image the file located at: {INPUT_URL}')
+        else:
             print('Wrong URL, check again')
             sys.exit()
 
@@ -74,18 +69,19 @@ if __name__ == '__main__':
 
     PARAM_DICTIONARY = {
             'INPUT_PATH': INPUT_PATH,
+            'INPUT_URL': INPUT_URL,
             'SCALE_FACTOR': SCALE_FACTOR,
             'FLAG_EMAIL': FLAG_EMAIL,
             'OUTPUT_FORMAT': OUTPUT_FORMAT,
             'SEED': SEED,
             'PROMPT': PROMPT,
-            'GUIDANCE_SCALE': GUIDANCE_SCALE,
-            'PROMPT_STRENGTH': PROMPT_STRENGTH,
-            'CONTROLNET_SCALE': CONTROLNET_SCALE,
-            'FACE_FIXER': FACE_FIXER,
-            'DENOISE_INPUT': DENOISE_INPUT,
+            'FRACTALITY': FRACTALITY,
+            'CREATIVITY': CREATIVITY,
+            'FIDELITY': FIDELITY,
+            'DENOISE': DENOISE,
+            'FACE_ENHANCER': FACE_ENHANCER,
             'FAST': FAST_FLAG,
         }
 
-    response = process_single_image(input_image, PARAM_DICTIONARY, TOKEN_DICTIONARY) 
+    response = process_single_image(PARAM_DICTIONARY, TOKEN_DICTIONARY) 
     print(response)

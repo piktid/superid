@@ -1,66 +1,6 @@
 import json
-import base64
 import requests
 from io import BytesIO
-from requests_toolbelt import MultipartEncoder
-from PIL import Image, ImageCms
-
-
-# -----------READ/WRITE FUNCTIONS------------
-def open_image_from_url(url):
-    response = requests.get(url, stream=True)
-    if not response.ok:
-        print(response)
-
-    image = Image.open(BytesIO(response.content))
-    return image
-
-
-def open_image_from_path(path):
-    f = open(path, 'rb')
-    buffer = BytesIO(f.read())
-    image = Image.open(buffer)
-    return image
-
-    return BytesIO(response.content)
-
-
-def im_2_B(image):
-    # Convert Image to buffer
-    buff = BytesIO()
-
-    if image.mode == 'CMYK':
-        image = ImageCms.profileToProfile(image, 'ISOcoated_v2_eci.icc', 'sRGB Color Space Profile.icm', renderingIntent=0, outputMode='RGB')
-
-    image.save(buff, format='PNG',icc_profile=image.info.get('icc_profile'))
-    img_str = buff.getvalue()
-    return img_str
-
-
-def im_2_buffer(image):
-    # Convert Image to bytes 
-    buff = BytesIO()
-
-    if image.mode == 'CMYK':
-        image = ImageCms.profileToProfile(image, 'ISOcoated_v2_eci.icc', 'sRGB Color Space Profile.icm', renderingIntent=0, outputMode='RGB')
-
-    image.save(buff, format='PNG',icc_profile=image.info.get('icc_profile'))
-    return buff
-
-
-def b64_2_img(data):
-    # Convert Base64 to Image
-    buff = BytesIO(base64.b64decode(data))
-    return Image.open(buff)
-    
-
-def im_2_b64(image):
-    # Convert Image 
-    buff = BytesIO()
-    image.save(buff, format='PNG')
-    img_str = base64.b64encode(buff.getvalue()).decode('utf-8')
-    return img_str
-
 
 # ---QUICK UTILS---
 def extract_link(data_list, id_image, id_project):
@@ -96,29 +36,40 @@ def refresh_call(TOKEN_DICTIONARY):
 
 
 # UPLOAD
-def upload_superid_call(src_img, TOKEN_DICTIONARY):
+def upload_superid_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
     # Upload the image into PiktID's servers and get the id of the project and of the image
     TOKEN = TOKEN_DICTIONARY.get('access_token', '')
     URL_API = TOKEN_DICTIONARY.get('url_api')
 
-    src_img_B = im_2_buffer(src_img)
+    target_full_path = PARAM_DICTIONARY.get('INPUT_PATH')
+    if target_full_path is None:
+        target_url = PARAM_DICTIONARY.get('INPUT_URL')
+        image_response = requests.get(target_url)
+        image_response.raise_for_status()  
+        image_file = BytesIO(image_response.content)
+        image_file.name = 'target.jpg' 
+        
+    else:
+        image_file = open(target_full_path, 'rb')
 
-    options = '0'
-    m = MultipartEncoder(
-                        fields={'options': options,
-                                'file': ('file', src_img_B, 'text/plain')}
-                        )
-    
-    response = requests.post(URL_API+'/upload_extra', 
-                             headers={
-                                      "Content-Type": m.content_type,
-                                      'Authorization': 'Bearer '+TOKEN},
-                             data=m,
-                             )
+    # request with file
+    response = requests.post(URL_API+'/superid/upload', 
+                                headers={'Authorization': 'Bearer '+TOKEN},
+                                files={'file': image_file},
+                                )
+
+    if response.status_code == 401:
+        TOKEN_DICTIONARY = refresh_call(TOKEN_DICTIONARY)
+        TOKEN = TOKEN_DICTIONARY.get('access_token', '')
+        # try with new TOKEN
+        response = requests.post(URL_API+'/superid/upload', 
+                                    headers={'Authorization': 'Bearer '+TOKEN},
+                                    files={'file': image_file},
+                                    )
 
     response_json = json.loads(response.text)
-    # print(response_json)
-    
+    print(f"Upload successful. Response json: {response_json}")
+
     id_project = response_json.get('id_project')
     id_image = response_json.get('id_image')
 
@@ -128,36 +79,32 @@ def upload_superid_call(src_img, TOKEN_DICTIONARY):
 def update_data_upscaling_call(data, PARAM_DICTIONARY):
     # update the json data first
 
-    GUIDANCE_SCALE = PARAM_DICTIONARY.get('GUIDANCE_SCALE')
-    PROMPT_STRENGTH = PARAM_DICTIONARY.get('PROMPT_STRENGTH')
-    CONTROLNET_SCALE = PARAM_DICTIONARY.get('CONTROLNET_SCALE')
+    FRACTALITY = PARAM_DICTIONARY.get('FRACTALITY')
+    CREATIVITY = PARAM_DICTIONARY.get('CREATIVITY')
+    FIDELITY = PARAM_DICTIONARY.get('FIDELITY')
+    DENOISE = PARAM_DICTIONARY.get('DENOISE')
+    FACE_ENHANCER = PARAM_DICTIONARY.get('FACE_ENHANCER')
+    PROMPT = PARAM_DICTIONARY.get('PROMPT')
 
-    if GUIDANCE_SCALE is not None:
-        data.update({'guidance_scale': GUIDANCE_SCALE})
+    if FRACTALITY is not None:
+        data.update({'fractality': FRACTALITY})
         
-    if PROMPT_STRENGTH is not None:
-        data.update({'prompt_strength': PROMPT_STRENGTH})
+    if CREATIVITY is not None:
+        data.update({'creativity': CREATIVITY})
 
-    if CONTROLNET_SCALE is not None:
-        data.update({'controlnet_conditioning_scale': CONTROLNET_SCALE})
+    if FIDELITY is not None:
+        data.update({'fidelity': FIDELITY})
 
-    # extra options
+    if DENOISE is not None:
+        data.update({'denoise': DENOISE})
 
-    FACE_FIXER = PARAM_DICTIONARY.get('FACE_FIXER')
-    DENOISE_INPUT = PARAM_DICTIONARY.get('DENOISE_INPUT')
+    if FACE_ENHANCER is not None:
+        data.update({'face_enhancer': FACE_ENHANCER})
 
-    OPTIONS_DICT = {}
+    if PROMPT is not None:
+        data.update({'prompt': PROMPT})
 
-    if FACE_FIXER is not None:
-        OPTIONS_DICT = {**OPTIONS_DICT, 'face_enhancer': FACE_FIXER}
-
-    if DENOISE_INPUT is not None:
-        OPTIONS_DICT = {**OPTIONS_DICT, 'denoise_input': DENOISE_INPUT}
-
-    OPTIONS = json.dumps(OPTIONS_DICT)
-    extra_options = {'options': OPTIONS}
-    data.update(extra_options)
-
+    # contact us for more parameters
     return data
 
 
@@ -166,16 +113,12 @@ def upscaling_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
     id_image = PARAM_DICTIONARY.get('IMAGE_ID') 
     seed = PARAM_DICTIONARY.get('SEED')
     scale_factor = PARAM_DICTIONARY.get('SCALE_FACTOR')
-    upscaler_type = PARAM_DICTIONARY.get('UPSCALER_TYPE', '4')
-    upscaling_mode = PARAM_DICTIONARY.get('UPSCALING_MODE', 'super')
     flag_email = PARAM_DICTIONARY.get('FLAG_EMAIL')
     output_format = PARAM_DICTIONARY.get('OUTPUT_FORMAT')
 
     data = {'id_project': id_project, 
             'id_image': id_image, 
             'scale_factor': scale_factor, 
-            'upscaler_type': upscaler_type, 
-            'upscaling_mode': upscaling_mode, 
             'flag_email': flag_email, 
             'output_format': output_format, 
             'seed': seed
@@ -187,10 +130,19 @@ def upscaling_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
     TOKEN = TOKEN_DICTIONARY.get('access_token', '')
     URL_API = TOKEN_DICTIONARY.get('url_api')
 
-    response = requests.post(URL_API+'/superid', 
+    response = requests.post(URL_API+'/superid/v2', 
                              headers={'Authorization': 'Bearer '+TOKEN},
                              json=data,
                              )
+    
+    if response.status_code == 401:
+        TOKEN_DICTIONARY = refresh_call(TOKEN_DICTIONARY)
+        TOKEN = TOKEN_DICTIONARY.get('access_token', '')
+        # try with new TOKEN
+        response = requests.post(URL_API+'/superid/v2', 
+                                 headers={'Authorization': 'Bearer '+TOKEN},
+                                 json=data,
+                                 )
 
     response_json = json.loads(response.text)
 
@@ -248,11 +200,8 @@ def get_superid_info(PARAM_DICTIONARY, TOKEN_DICTIONARY):
     id_image = PARAM_DICTIONARY.get('IMAGE_ID') 
     scale_factor = PARAM_DICTIONARY.get('SCALE_FACTOR')
 
-    upscaling_mode = PARAM_DICTIONARY.get('UPSCALING_MODE', 'super')
-    strength = PARAM_DICTIONARY.get('PROMPT_STRENGTH', '0.35')
-
-    data = {'id_project': id_project, 'id_image': id_image, 'scale_factor': scale_factor, 'upscaling_mode': upscaling_mode, 
-            'strength': strength, 'num_inference_steps': 20}
+    data = {'id_project': id_project, 'id_image': id_image, 'scale_factor': scale_factor, 'upscaling_mode': 'normal', 
+            'strength': '0.35', 'num_inference_steps': 20}
 
     TOKEN = TOKEN_DICTIONARY.get('access_token', '')
     URL_API = TOKEN_DICTIONARY.get('url_api')
