@@ -4,10 +4,10 @@ from time import sleep
 from superid_api import upload_superid_call, upscaling_call, upscaling_fast_call, get_superid_info, get_superid_link
 
 
-def process_single_image(input_image, PARAM_DICTIONARY, TOKEN_DICTIONARY):
+def process_single_image(PARAM_DICTIONARY, TOKEN_DICTIONARY):
 
     # UPLOAD
-    project_id, image_id = upload_superid_call(input_image, TOKEN_DICTIONARY)
+    project_id, image_id = upload_superid_call(PARAM_DICTIONARY, TOKEN_DICTIONARY)
 
     PARAM_DICTIONARY = {**PARAM_DICTIONARY, 'IMAGE_ID': image_id, 'PROJECT_ID': project_id}
 

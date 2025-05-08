@@ -5,7 +5,7 @@
 </p>
 
 
-# SuperID 3.1.0
+# SuperID 3.2.0
 [![Official Website](https://img.shields.io/badge/Official%20Website-piktid.com-blue?style=flat&logo=world&logoColor=white)](https://piktid.com)
 [![Discord Follow](https://dcbadge.vercel.app/api/server/FJU39e9Z4P?style=flat)](https://discord.com/invite/FJU39e9Z4P)
 
@@ -47,16 +47,24 @@ $ export SUPERID_EMAIL={Your email here}
 $ export SUPERID_PASSWORD={Your password here}
 ```
 
-> **Step 3** - Run the main function with the URL of the image to be upscaled
+> **Step 3** - Run the main function with the URL of the image or a local file path to be upscaled
 ```bash
+# Using a URL
 $ python3 main.py --url 'your-url'
+
+# Using a local file path
+$ python3 main.py --filepath '/path/to/your/image.jpg'
 ```
 
 Without any additional argument, SuperID upscales the image times 2 and provides the result asynchronously. 
 If you want to change the output resolution, format or retrieval method, use the following general command:
 
 ```bash
-$ python3 main.py --scale_factor '2' --output_format 'PNG' --email
+# Using a URL
+$ python3 main.py --url 'your-url' --scale_factor '2' --output_format 'PNG' --email
+
+# Using a local file path
+$ python3 main.py --filepath '/path/to/your/image.jpg' --scale_factor '2' --output_format 'PNG' --email
 ```
 
 - **scale_factor**: Select the upscaling factor: upscale time 2 or times 4
@@ -64,38 +72,48 @@ $ python3 main.py --scale_factor '2' --output_format 'PNG' --email
 - **email**: Get the output link via email once ready
 
 
-## Face fixer
-It is now possible to automatically enhance little faces in photos while upscaling the input. To do so, add the flag:
-
-```bash
-$ python3 main.py --face_fixer
-```
-
-## Image denoising (coming soon)
-It is also possible to reduce the noise in the original photo by playing with the parameter (range 0-1), as in the example:
-
-```bash
-$ python3 main.py --denoise_input '0.5'
-```
-
 ## Creative upscaling (for advanced users)
 To modify the capabilities of SuperID towards more conservative or creative outputs, control the upscaling process through the generative parameters as follows:
 
 ```bash
-$ python3 main.py --prompt '' --prompt_strength '0.35' --controlnet_scale '0.5' --seed 0
+# Using a URL
+$ python3 main.py --url 'your-url' --prompt '' --creativity 7 --fractality 3 --fidelity 5 --seed 0
+
+# Using a local file path
+$ python3 main.py --filepath '/path/to/your/image.jpg' --prompt '' --creativity 7 --fractality 3 --fidelity 5 --seed 0
 ```
 
 - **prompt**: Describe your image
-- **prompt_strength**: The lower the more similar to the input image, the higher, the more diverse (range 0-1)
-- **guidance_scale**: How much to follow the prompt description (range 1-10)
-- **controlnet_scale**: The higher, the more the upscaling will follow the lines of the input image (range 0-1)
-- **seed**: Choose a seed to replicate the results
+- **creativity**: The lower the more similar to the input image, the higher, the more diverse (range 1-20)
+- **fractality**: How much to follow the prompt description (range 1-20)
+- **fidelity**: The higher, the more the upscaling will follow the resemblance of the input image (range 0-20)
+- **seed**: Choose a seed to reproduce the results
 
-## Fast upscaling (coming soon)
-When the output quality is not the main priority, we allow users to opt for a fast upscaling process via the command:
+## Face enhancer
+It is now possible to automatically enhance little faces in photos while upscaling the input. To do so, add the flag:
 
 ```bash
-$ python3 main.py --fast
+
+# Using a local file path
+$ python3 main.py --filepath '/path/to/your/image.jpg' --face_enhancer
+```
+
+## Image denoising
+You can reduce the noise in the original photo by adjusting the denoise parameter (range 0-20), as in the example:
+
+```bash
+
+# Using a local file path
+$ python3 main.py --filepath '/path/to/your/image.jpg' --denoise 10
+```
+
+## Fast upscaling
+When speed is a priority and you need quick results, you can use the fast upscaling option:
+
+```bash
+
+# Using a local file path
+$ python3 main.py --filepath '/path/to/your/image.jpg' --fast
 ```
 
 ## Contact
