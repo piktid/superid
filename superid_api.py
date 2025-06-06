@@ -82,10 +82,18 @@ def update_data_upscaling_call(data, PARAM_DICTIONARY):
     FRACTALITY = PARAM_DICTIONARY.get('FRACTALITY')
     CREATIVITY = PARAM_DICTIONARY.get('CREATIVITY')
     FIDELITY = PARAM_DICTIONARY.get('FIDELITY')
+    SEED = PARAM_DICTIONARY.get('SEED')
     DENOISE = PARAM_DICTIONARY.get('DENOISE')
     FACE_ENHANCER = PARAM_DICTIONARY.get('FACE_ENHANCER')
     PROMPT = PARAM_DICTIONARY.get('PROMPT')
 
+    FORCE_FACE_ENHANCER = PARAM_DICTIONARY.get('FORCE_FACE_ENHANCER')
+    IMAGE_FILTERS_FLAG = PARAM_DICTIONARY.get('IMAGE_FILTERS_FLAG')
+    MATCH_COLORS_FLAG = PARAM_DICTIONARY.get('MATCH_COLORS_FLAG')
+
+    OPTIONS_DICT = {}
+
+    # Superid parameters
     if FRACTALITY is not None:
         data.update({'fractality': FRACTALITY})
         
@@ -101,8 +109,26 @@ def update_data_upscaling_call(data, PARAM_DICTIONARY):
     if FACE_ENHANCER is not None:
         data.update({'face_enhancer': FACE_ENHANCER})
 
+    if SEED is not None:
+        data.update({'seed': SEED})
+
     if PROMPT is not None:
         data.update({'prompt': PROMPT})
+
+    # Options parameters
+    if FORCE_FACE_ENHANCER is not None:
+        OPTIONS_DICT.update({'force_fixer': FORCE_FACE_ENHANCER})
+
+    # Image enhancement parameters
+    if IMAGE_FILTERS_FLAG is not None:
+        OPTIONS_DICT.update({'image_filters_flag': IMAGE_FILTERS_FLAG})
+
+    if MATCH_COLORS_FLAG is not None:
+        OPTIONS_DICT.update({'match_colors_flag': MATCH_COLORS_FLAG})
+
+    OPTIONS = json.dumps(OPTIONS_DICT)
+    extra_options = {'options': OPTIONS}
+    data.update(extra_options)
 
     # contact us for more parameters
     return data
@@ -111,7 +137,6 @@ def update_data_upscaling_call(data, PARAM_DICTIONARY):
 def upscaling_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
     id_project = PARAM_DICTIONARY.get('PROJECT_ID') 
     id_image = PARAM_DICTIONARY.get('IMAGE_ID') 
-    seed = PARAM_DICTIONARY.get('SEED')
     scale_factor = PARAM_DICTIONARY.get('SCALE_FACTOR')
     flag_email = PARAM_DICTIONARY.get('FLAG_EMAIL')
     output_format = PARAM_DICTIONARY.get('OUTPUT_FORMAT')
@@ -120,8 +145,7 @@ def upscaling_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
             'id_image': id_image, 
             'scale_factor': scale_factor, 
             'flag_email': flag_email, 
-            'output_format': output_format, 
-            'seed': seed
+            'output_format': output_format
             }
 
     data = update_data_upscaling_call(data, PARAM_DICTIONARY)
@@ -149,10 +173,40 @@ def upscaling_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
     return response_json
 
 
+def update_data_upscaling_fast_call(data, PARAM_DICTIONARY):
+    # update the json data first
+
+    SEED = PARAM_DICTIONARY.get('SEED')
+    FORCE_FACE_ENHANCER = PARAM_DICTIONARY.get('FORCE_FACE_ENHANCER')
+    IMAGE_FILTERS_FLAG = PARAM_DICTIONARY.get('IMAGE_FILTERS_FLAG')
+    MATCH_COLORS_FLAG = PARAM_DICTIONARY.get('MATCH_COLORS_FLAG')
+
+    OPTIONS_DICT = {}
+
+    if SEED is not None:
+        data.update({'seed': SEED})
+
+    # Options parameters
+    if FORCE_FACE_ENHANCER is not None:
+        OPTIONS_DICT.update({'force_fixer': FORCE_FACE_ENHANCER})
+
+    # Image enhancement parameters
+    if IMAGE_FILTERS_FLAG is not None:
+        OPTIONS_DICT.update({'image_filters_flag': IMAGE_FILTERS_FLAG})
+
+    if MATCH_COLORS_FLAG is not None:
+        OPTIONS_DICT.update({'match_colors_flag': MATCH_COLORS_FLAG})
+
+    OPTIONS = json.dumps(OPTIONS_DICT)
+    extra_options = {'options': OPTIONS}
+    data.update(extra_options)
+
+    return data
+
+
 def upscaling_fast_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
     id_project = PARAM_DICTIONARY.get('PROJECT_ID') 
     id_image = PARAM_DICTIONARY.get('IMAGE_ID') 
-    seed = PARAM_DICTIONARY.get('SEED')
     scale_factor = PARAM_DICTIONARY.get('SCALE_FACTOR')
     flag_email = PARAM_DICTIONARY.get('FLAG_EMAIL')
     output_format = PARAM_DICTIONARY.get('OUTPUT_FORMAT')
@@ -161,10 +215,10 @@ def upscaling_fast_call(PARAM_DICTIONARY, TOKEN_DICTIONARY):
             'id_image': id_image, 
             'scale_factor': scale_factor, 
             'flag_email': flag_email, 
-            'output_format': output_format, 
-            'seed': seed
+            'output_format': output_format 
             }
 
+    data = update_data_upscaling_fast_call(data, PARAM_DICTIONARY)
     print(f'data to send to fast upscale: {data}')
 
     TOKEN = TOKEN_DICTIONARY.get('access_token', '')
